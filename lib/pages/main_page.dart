@@ -27,6 +27,7 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     final userRepo = Provider.of<UserRepository>(context);
+    print(userRepo.user);
     return Scaffold(
       backgroundColor: Color(0xFFF3F5F7),
       body: _mainPages[_selectedPage],
@@ -36,16 +37,17 @@ class _MainPageState extends State<MainPage> {
         animationDuration: Duration(milliseconds: 400),
         index: _selectedPage,
         onTap: (int value) {
+          print(userRepo.user);
           setState(() {
             _selectedPage = value;
           });
         },
         items: <Widget>[
-          Icon(Icons.near_me, size: 30),
-          Icon(Icons.add, size: 30),
-          Icon(Icons.memory),
-          Icon(Icons.list, size: 30),
-          Icon(Icons.account_circle, size: 30),
+          Icon(Icons.near_me, size: 30, color: _selectedPage == 0 ? Theme.of(context).scaffoldBackgroundColor : Colors.black,),
+          Icon(Icons.add, size: 30, color: _selectedPage == 1 ? Theme.of(context).scaffoldBackgroundColor : Colors.black,),
+          Icon(Icons.memory, color: _selectedPage == 2 ? Theme.of(context).scaffoldBackgroundColor : Colors.black,),
+          Icon(Icons.list, size: 30, color: _selectedPage == 3 ? Theme.of(context).scaffoldBackgroundColor : Colors.black,),
+          Icon(Icons.account_circle, size: 30, color: _selectedPage == 4 ? Theme.of(context).scaffoldBackgroundColor : Colors.black,),
         ],
       ),
     );

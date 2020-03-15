@@ -18,6 +18,9 @@ class TraceryLocalizations {
       'forgot-password': "Forgot password?",
       'sign-up': "Dont have an account? Sign up.",
       'me-title': "Your ID",
+      'unlock-btn': "Allow scanning",
+      'lock-btn': "Lock scanning",
+      'load-scan-fail': "No scans loaded. Make sure you were scanned and check your internet."
     },
     'de': {
       'welcome': 'Willkommen bei Tracery.',
@@ -28,6 +31,9 @@ class TraceryLocalizations {
       'forgot-password': "Passwort vergessen?",
       "sign-up": "Sie haben noch keinen Account? Anmelden.",
       'me-title': "Ihre ID",
+      'unlock-btn': "Scannen zulassen",
+      'lock-btn': 'Scannen sperren',
+      'load-scan-fail': 'Keine Scans geladen. Stellen Sie sicher, dass Sie gescannt wurden, und überprüfen Sie Ihr Internet.',
     },
     'ar': {
       'welcome': 'مرحبا بكم في التريساري',
@@ -38,6 +44,9 @@ class TraceryLocalizations {
       'forgot-password': "هل نسيت كلمة المرور",
       "sign-up": "لا تملك حساب؟ سجل",
       "me-title": "هويتك",
+      'unlock-btn': 'السماح بالمسح الضوئي',
+      'lock-btn': 'مسح القفل',
+      'load-scan-fail': 'لم يتم تحميل أي عمليات مسح. تأكد من أنه تم مسحك ضوئيًا وتحقق من الإنترنت.',
     },
     'fr': {
       'welcome': 'Bienvenue à Tracery.',
@@ -48,6 +57,9 @@ class TraceryLocalizations {
       'forgot-password': "mot de passe oublié?",
       "sign-up": "Vous n'avez pas de compte? S'inscrire.",
       'me-title': "Votre identifiant",
+      'unlock-btn': "Autoriser la numérisation",
+      'lock-btn': "Verrouiller la numérisation",
+      'load-scan-fail': "Aucune analyse chargée. Assurez-vous d'avoir été scanné et vérifiez votre Internet.",
     },
     'it': {
       'welcome': 'Benvenuto in Tracery.',
@@ -58,6 +70,9 @@ class TraceryLocalizations {
       'forgot-password': "Ha dimenticato la password?",
       "sign-up": "Non hai un account? Iscriviti.",
       'me-title': "La tua carta d'identità",
+      'unlock-btn': "Consenti scansione",
+      'lock-btn': 'Blocca la scansione',
+      'load-scan-fail': "Nessuna scansione caricata. Assicurati di essere stato scansionato e controlla la tua connessione Internet.",
     },
   };
   String get(String id) {

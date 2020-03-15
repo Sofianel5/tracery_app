@@ -39,7 +39,8 @@ class UserRepository with ChangeNotifier {
       if (response.statusCode == 200) {
         jsonData = json.decode(response.body);
         sharedPrefrences.setString("token", jsonData["auth_token"]);
-        _user = await _getUser();
+        _getUser();
+        print("in sign up, _user is " + (_user == null ? "null" : _user.toString()));
         _status = Status.Authenticated;
         notifyListeners();
         return true;
@@ -127,20 +128,26 @@ class UserRepository with ChangeNotifier {
   }
   
   Future _getUser() async {
-    print("getting user");
+    print("getting user, currently " + (_user == null ? "null" : _user.toString()));
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token") ?? "";
-    print(token);
-    var response = await http.get(Urls.USER_URL, 
+    http.Response response;
+    try {
+     response = await http.get(Urls.USER_URL, 
       headers: {"Authorization": "Token " +token, 'Accept': "application/json"}
     );
+    } catch(e) {
+      print("connc error " + e.toString());
+      return;
+    }
+    print(response);
     var responseJson;
     if (response.statusCode == 200) {
       _status = Status.Authenticated;
       notifyListeners();
       responseJson = json.decode(response.body);
-      _user = User.fromJson(responseJson);
-      print(_user);
+      this._user = User.fromJson(responseJson);
+      print("set this._user to " + this._user.toString());
     }
   }
 
@@ -151,7 +158,32 @@ class UserRepository with ChangeNotifier {
     notifyListeners();
     return Future.delayed(Duration.zero);
   }
-
+  Future<bool> toggleLockState() async {
+    print("toggling lock");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token") ?? "";
+    var response = await http.post(Urls.TOGGLE_LOCK_STATE, 
+      headers: {"Authorization": "Token " +token, 'Accept': "application/json"},
+    );
+    if (response.statusCode == 200) {
+      _user.isLocked = !_user.isLocked;
+      notifyListeners();
+      return true;
+    }
+    return false;
+  }
+  Future<bool> checkForScan() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token") ?? "";
+    var response = await http.post(Urls.CHECK_FOR_VENUE_SCAN, 
+      headers: {"Authorization": "Token " +token, 'Accept': "application/json"},
+    );
+    if (response.statusCode == 200) {
+      var responseJson = json.decode(response.body);
+      return responseJson["success"];
+    }
+    return false;
+  }
   Future<void> _onAuthStateChanged(User user) async {
     if (user == null) {
       _status = Status.Unauthenticated;

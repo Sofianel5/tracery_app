@@ -16,10 +16,15 @@ class User {
 
   @JsonKey(name: 'last_name')
   String lastName;
+
+  @JsonKey(name: 'public_id')
   String puid;
 
   @JsonKey(name: 'security_level')
-  int securityLevel;
+  String securityLevel;
+
+  @JsonKey(name: 'security_value')
+  double securityValue;
 
   @JsonKey(name: 'qr_img')
   String qrImgUrl;
@@ -33,9 +38,13 @@ class User {
   @JsonKey(name: 'dob')
   DateTime dateOfBirth;
 
+  @JsonKey(name: "is_locked")
+  bool isLocked; 
+
+  
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
   Map<String, dynamic> toJson() => _$UserToJson(this);
   String toString() {
-    return firstName + " " + lastName;
+    return firstName + " \n" + lastName + " \n" + email + " \n" + puid + " \n" + securityLevel + " \n" + securityValue.toString() + " \n" + qrImgUrl + " \n";
   }
 }

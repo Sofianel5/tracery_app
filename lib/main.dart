@@ -8,7 +8,6 @@ import 'package:tracery_app/localizations.dart';
 import 'package:tracery_app/pages/login_page.dart';
 import 'package:tracery_app/pages/main_page.dart';
 
-
 void main() => runApp(TraceryApp());
 
 class TraceryApp extends StatefulWidget {
@@ -17,7 +16,6 @@ class TraceryApp extends StatefulWidget {
 }
 
 class AppState extends State<TraceryApp> {
-  
   Locale locale;
   bool localeLoaded = false;
 
@@ -31,14 +29,16 @@ class AppState extends State<TraceryApp> {
       });
     });
   }
+
   _fetchLocale() async {
     var prefs = await SharedPreferences.getInstance();
     if (prefs.getString('language_code') == null) {
       return null;
     }
-    return Locale(prefs.getString('language_code'), 
-      prefs.getString('country_code'));
+    return Locale(
+        prefs.getString('language_code'), prefs.getString('country_code'));
   }
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
@@ -47,11 +47,11 @@ class AppState extends State<TraceryApp> {
     ]);
     return MaterialApp(
       localeResolutionCallback: (deviceLocale, supportedLocales) {
-          if (this.locale == null) {
-            this.locale = deviceLocale;
-          }
-          return this.locale;
-        },
+        if (this.locale == null) {
+          this.locale = deviceLocale;
+        }
+        return this.locale;
+      },
       title: 'Tracery',
       theme: ThemeData(
         primaryColor: Color(0xFF1b4774),
@@ -83,14 +83,17 @@ class RootPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => UserRepository(),
-      child: Consumer(builder: (context, UserRepository user, _) {
-        switch (user.status) {
-          case Status.Authenticated:
-            return MainPage();
-          default:
-            return MainPage();
-        }
-      },),
+      child: Consumer(
+        builder: (context, UserRepository user, _) {
+          print("building, :" + (user.user == null ? "null" : user.user.toString()) + " status, :" + user.status.toString());
+          switch (user.status) {
+            case Status.Authenticated:
+              return MainPage();
+            default:
+              return LoginPage();
+          }
+        },
+      ),
     );
   }
 }
