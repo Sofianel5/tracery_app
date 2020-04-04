@@ -1,4 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:tracery_app/models/anon_user_model.dart';
+import 'package:tracery_app/models/venue_model.dart';
 part 'user_model.g.dart';
 
 @JsonSerializable(explicitToJson: true)
@@ -35,12 +37,16 @@ class User {
   @JsonKey(name: 'is_gov')
   bool isGovAgent; 
 
+  bool isPrivate;
+
   @JsonKey(name: 'dob')
   DateTime dateOfBirth;
 
   @JsonKey(name: "is_locked")
   bool isLocked; 
 
+  @JsonKey(name: "anon_user")
+  AnonUser anonUser;
   
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
   Map<String, dynamic> toJson() => _$UserToJson(this);

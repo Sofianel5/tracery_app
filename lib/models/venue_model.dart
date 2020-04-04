@@ -7,7 +7,7 @@ class Venue {
   Venue({this.title, this.coordinates, this.publicId, this.securityValue});
   String title;
   Coordinates coordinates;
-
+  int id;
   @JsonKey(name: 'security_level')
   String securityLevel;
 

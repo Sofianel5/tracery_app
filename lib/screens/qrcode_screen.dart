@@ -8,15 +8,22 @@ import 'package:tracery_app/localizations.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_circular_chart/flutter_circular_chart.dart';
+import 'package:tracery_app/models/thread_from_venue_model.dart';
+import 'package:tracery_app/widgets/risk_graph.dart';
 
 class QRScreen extends StatefulWidget {
+  QRScreen({this.userRepo});
+  UserRepository userRepo;
   @override
-  State<StatefulWidget> createState() => QRScreenState();
+  State<StatefulWidget> createState() => QRScreenState(userRepo: userRepo);
 }
 
 class QRScreenState extends State<QRScreen> {
+  QRScreenState({this.userRepo});
+  UserRepository userRepo;
   bool firstLoad = true;
   bool loading = false;
+  ThreadFromVenue thread;
   bool scanSuccessful = false;
   final GlobalKey<AnimatedCircularChartState> _chartKey =
       new GlobalKey<AnimatedCircularChartState>();
@@ -33,8 +40,8 @@ class QRScreenState extends State<QRScreen> {
               print("unlocking after pressing unlock button");
               int counter = 0;
               loading = true;
-              while (!await userRepo.checkForScan()) {
-                if (userRepo.user.isLocked) {
+              while (!((await userRepo.checkForScan())["success"])) {
+                if (userRepo.user.anonUser.isLocked) {
                   print("user locked. exiting loop.");
                   loading = false;
                   return;
@@ -53,7 +60,15 @@ class QRScreenState extends State<QRScreen> {
                   return;
                 }
               }
-              loading = false;
+              ThreadFromVenue _threadRes =
+                  (await userRepo.checkForScan())['Thread'];
+              if (!userRepo.user.anonUser.isLocked) {
+                userRepo.toggleLockState();
+              }
+              setState(() {
+                thread = _threadRes;
+                loading = false;
+              });
             },
             elevation: 10,
             padding: EdgeInsets.all(15),
@@ -125,15 +140,48 @@ class QRScreenState extends State<QRScreen> {
         : Container();
   }
 
-  Widget _buildLockedContents(UserRepository userRepo) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.only(top: 50),
-        child: SpinKitWave(color: Theme.of(context).accentColor, size: 150),
+
+  Widget _buildConfirmButton(UserRepository userRepo, Color backgroundColor) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 25),
+      width: double.infinity,
+      child: RaisedButton(
+        onPressed: () async {
+          if (await userRepo.confirmThreadAsUser(thread.threadId, false)) {
+            setState(() {
+              thread = null;
+            });
+          }
+        },
+        elevation: 10,
+        padding: EdgeInsets.all(15),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        color: backgroundColor,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(
+              Icons.check,
+              color: Colors.black,
+            ),
+            SizedBox(
+              width: 20,
+            ),
+            Text(
+              TraceryLocalizations.of(context).get("confirm-entry"),
+              style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 20,
+                  color: Colors.black),
+            ),
+          ],
+        ),
       ),
     );
   }
+
   Color getColorForValue(double value) {
+    print(value);
     Color dialColor;
     if (value > 90) {
       dialColor = Colors.red[900];
@@ -154,49 +202,29 @@ class QRScreenState extends State<QRScreen> {
     }
     return dialColor;
   }
-  List<CircularStackEntry> _generateChartData(double value) {
-    Color dialColor = getColorForValue(value);
-    List<CircularStackEntry> data = <CircularStackEntry>[
-      CircularStackEntry(
-        <CircularSegmentEntry>[
-          CircularSegmentEntry(
-            value,
-            dialColor,
-            rankKey: 'percentage',
+
+  Widget _buildLockedInfo(UserRepository userRepo) {
+    return thread == null
+        ? Center(
+            child: Text(TraceryLocalizations.of(context).get("no-scans") ?? "No pending scans"),
           )
-        ],
-        rankKey: 'percentage',
-      ),
-    ];
-    return data;
-  }
-  Widget _buildResults(double securityValue) {
-    return Center(
-      child: Stack(
-        children: <Widget>[
-          AnimatedCircularChart(
-            key: _chartKey,
-            initialChartData: _generateChartData(securityValue),
-            chartType: CircularChartType.Radial,
-            edgeStyle: SegmentEdgeStyle.round,
-            percentageValues: true,
-            holeLabel: 'securityValue%',
-            labelStyle: TextStyle(color: getColorForValue(securityValue)),
-            size: Size(200.0, 200.0),
-          ),
-        ],
-      ),
-    );
+        : Column(
+            children: <Widget>[
+              Text(
+                TraceryLocalizations.of(context).get("assessable-risk") ?? "Assessable risk",
+                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
+              ),
+              RiskGraph(size: Size(200,200), riskValue: thread.from.securityValue),
+              _buildConfirmButton(
+                  userRepo, getColorForValue(thread.from.securityValue))
+            ],
+          );
   }
 
-  Widget _buildLockedInfo() {
-    
-  }
   @override
   Widget build(BuildContext context) {
-    final userRepo = Provider.of<UserRepository>(context);
     if (firstLoad) {
-      if (!userRepo.user.isLocked) {
+      if (!userRepo.user.anonUser.isLocked) {
         print("locking user when entering page.");
         userRepo.toggleLockState();
       }
@@ -223,7 +251,7 @@ class QRScreenState extends State<QRScreen> {
                       Padding(
                         padding: const EdgeInsets.only(bottom: 10),
                         child: Text(
-                          TraceryLocalizations.of(context).get("me-title"),
+                          TraceryLocalizations.of(context).get("me-title") ?? "Me",
                           style: TextStyle(
                               fontSize: 28, fontWeight: FontWeight.w700),
                         ),
@@ -232,13 +260,13 @@ class QRScreenState extends State<QRScreen> {
                         children: [
                           Center(
                             child: QrImage(
-                              data: userRepo.user.puid,
+                              data: userRepo.user.anonUser.puid,
                               version: QrVersions.auto,
                               foregroundColor: Colors.black,
                               size: 200.0,
                             ),
                           ),
-                          !userRepo.user.isLocked
+                          !userRepo.user.anonUser.isLocked
                               ? Container()
                               : Center(
                                   child: ClipRect(
@@ -281,10 +309,12 @@ class QRScreenState extends State<QRScreen> {
                     const EdgeInsets.symmetric(vertical: 20, horizontal: 35),
                 child: Column(
                   children: <Widget>[
-                    userRepo.user.isLocked
+                    userRepo.user.anonUser.isLocked
                         ? _buildUnlockButton(userRepo)
                         : _buildLockButton(userRepo),
-                    _buildUnlockedContents(userRepo),
+                    userRepo.user.anonUser.isLocked
+                        ? _buildLockedInfo(userRepo)
+                        : _buildUnlockedContents(userRepo),
                   ],
                 ),
               ),

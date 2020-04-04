@@ -6,6 +6,7 @@ import 'package:tracery_app/api/user_repository.dart';
 import 'package:tracery_app/screens/account_screen.dart';
 import 'package:tracery_app/screens/history_screen.dart';
 import 'package:tracery_app/screens/near_me.dart';
+import 'package:tracery_app/screens/qr_screen_router.dart';
 import 'package:tracery_app/screens/qrcode_screen.dart';
 import 'package:tracery_app/screens/scan_screen.dart';
 
@@ -20,14 +21,12 @@ class _MainPageState extends State<MainPage> {
   final List<Widget> _mainPages = [
     NearMeScreen(),
     ScanScreen(),
-    QRScreen(),
+    QrScreenRouter(),
     HistoryScreen(),
     AccountScreen(),
   ];
   @override
   Widget build(BuildContext context) {
-    final userRepo = Provider.of<UserRepository>(context);
-    print(userRepo.user);
     return Scaffold(
       backgroundColor: Color(0xFFF3F5F7),
       body: _mainPages[_selectedPage],
@@ -37,7 +36,6 @@ class _MainPageState extends State<MainPage> {
         animationDuration: Duration(milliseconds: 400),
         index: _selectedPage,
         onTap: (int value) {
-          print(userRepo.user);
           setState(() {
             _selectedPage = value;
           });

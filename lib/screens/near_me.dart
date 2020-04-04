@@ -1,7 +1,9 @@
 import 'dart:async';
-
+import 'package:provider/provider.dart';
+import 'package:tracery_app/api/user_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:tracery_app/models/venue_model.dart';
 
 class NearMeScreen extends StatefulWidget {
   @override
@@ -9,27 +11,48 @@ class NearMeScreen extends StatefulWidget {
 }
 
 class NearMeScreenState extends State<NearMeScreen> {
+  UserRepository userRepo;
   Completer<GoogleMapController> _controller = Completer();
+  List<Marker> _markers;
 
-  static final CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
+  Future<List<Marker>> getVenueMarkers() async {
+    List<Venue> _venues = await userRepo.getVenues();
+    List<Marker> markers = [];
+    for (var venue in _venues) {
+      markers.add(
+        Marker(
+          markerId: MarkerId(
+            venue.id.toString(),
+          ),
+          position: LatLng(venue.coordinates.lat, venue.coordinates.lng),
+          infoWindow: InfoWindow(title: venue.title, snippet: venue.securityValue.toString())
+        ),
+      );
+    }
+    print(markers);
+    setState(() {
+      _markers = markers;
+    });
+  }
+
+  static final CameraPosition _center = CameraPosition(
+    target: LatLng(40.7175553, -74.0107331),
     zoom: 14.4746,
   );
-  static final CameraPosition _kLake = CameraPosition(
-      bearing: 192.8334901395799,
-      target: LatLng(37.43296265331129, -122.08832357078792),
-      tilt: 59.440717697143555,
-      zoom: 19.151926040649414);
+
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
+    if (userRepo == null) {
+      userRepo = Provider.of<UserRepository>(context);
+    }
     return GoogleMap(
-        mapType: MapType.normal,
-        initialCameraPosition: _kGooglePlex,
-        onMapCreated: (GoogleMapController controller) {
-          _controller.complete(controller);
-        },
-      );
+      mapType: MapType.normal,
+      initialCameraPosition: _center,
+      onMapCreated: (GoogleMapController controller) {
+        _controller.complete(controller);
+        getVenueMarkers();
+      },
+      markers: _markers == null ? Set<Marker>() : _markers.toSet()
+    );
   }
-  
 }

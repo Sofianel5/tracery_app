@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tracery_app/api/user_repository.dart';
 import 'package:tracery_app/localizations.dart';
-import 'package:tracery_app/pages/login_page.dart';
+import 'package:tracery_app/pages/anon_signup_page.dart';
 import 'package:tracery_app/pages/main_page.dart';
+import 'package:tracery_app/pages/splash_screen.dart';
 
 void main() => runApp(TraceryApp());
 
@@ -85,12 +86,13 @@ class RootPage extends StatelessWidget {
       create: (_) => UserRepository(),
       child: Consumer(
         builder: (context, UserRepository user, _) {
-          print("building, :" + (user.user == null ? "null" : user.user.toString()) + " status, :" + user.status.toString());
           switch (user.status) {
             case Status.Authenticated:
               return MainPage();
+            case Status.Uninitialized:
+              return SplashScreen();
             default:
-              return LoginPage();
+              return DefaultAuthPage();
           }
         },
       ),
